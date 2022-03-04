@@ -1,0 +1,9 @@
+package com.example.demo.proxy;
+
+import org.springframework.cloud.openfeign.FeignClient;
+
+@FeignClient
+public interface ProxyVehicle {
+
+	
+}
