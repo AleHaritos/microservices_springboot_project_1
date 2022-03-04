@@ -35,7 +35,8 @@ public class Vehicle implements Serializable {
 	@Column(nullable = false, length = 25)
 	private Color color;
 
-	private Long person_id;
+	@Column(name ="person_id")
+	private Long personId;
 	
 	
 	public Vehicle(Long id, String model, String license_plate, Integer colorCode, Long person) {
@@ -43,7 +44,7 @@ public class Vehicle implements Serializable {
 		this.model = model;
 		this.license_plate = license_plate;
 		this.color = Color.valueOf(colorCode );
-		this.person_id = person;
+		this.personId = person;
 	}
 	
 }

@@ -20,7 +20,7 @@ public class VehicleService {
 	private ProxyPerson proxy;
 	
 	public Vehicle addVehicle(Vehicle v) {
-		this.validationPerson(v.getPerson_id());
+		this.validationPerson(v.getPersonId());
 		return this.repository.save(v);
 	}
 	
@@ -31,6 +31,14 @@ public class VehicleService {
 	public List<Vehicle> getAll() {
 		return this.repository.findAll();
 	}
+	
+	public List<Vehicle> findAllByPerson_id(Long id) {
+		return this.repository.findByPersonId(id);
+	}
+	
+	public List<Vehicle> findAllByModel(String model) {
+	return this.repository.findByModel(model);
+}
 	
 	private void validationPerson(Long id) {
 		if(id == null) {
