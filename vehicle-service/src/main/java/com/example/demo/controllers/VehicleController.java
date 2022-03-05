@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -16,6 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.models.Vehicle;
 import com.example.demo.services.VehicleService;
 
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.retry.annotation.Retry;
+
 @RestController
 @RequestMapping(value = "/vehicle")
 public class VehicleController {
@@ -23,28 +27,43 @@ public class VehicleController {
 	@Autowired
 	private VehicleService service;
 	
+	@RateLimiter(name = "default")
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public Vehicle insertVehicle(@RequestBody Vehicle v) {
 		return service.addVehicle(v);
 	}
 	
+	@Retry(name = "default")
+	@RateLimiter(name = "default")
 	@GetMapping
 	public ResponseEntity<List<Vehicle>> getAll() {
 		List<Vehicle> list = service.getAll();
 		return ResponseEntity.ok(list);
 	}
 	
+	@RateLimiter(name = "default")
 	@GetMapping(value = "/{id}")
-	public ResponseEntity<Vehicle> getById(Long id) {
-		Vehicle v = service.getById(id);
-		return ResponseEntity.ok(v);
+	@ResponseStatus(HttpStatus.OK)
+	public Vehicle getById(@PathVariable Long id) {
+		return service.getById(id);
 	}
 	
+	@Retry(name = "default")
+	@RateLimiter(name = "default")
 	@GetMapping(value = "/person/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	public List<Vehicle> findAllByPersonId(@PathVariable Long id) {
 		return this.service.findAllByPerson_id(id);
 	}
+	
+	@Retry(name = "default")
+	@RateLimiter(name = "default")
+	@PutMapping(value = "/{id}/{person-id}")
+	public ResponseEntity<Vehicle> changeOwner(@PathVariable("id") Long id, @PathVariable("person-id") Long person_id) {
+		Vehicle v = this.service.changeOwner(id, person_id);
+		return ResponseEntity.ok(v);
+	}
+	
 	
 }

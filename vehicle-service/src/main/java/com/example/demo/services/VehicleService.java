@@ -40,6 +40,13 @@ public class VehicleService {
 	return this.repository.findByModel(model);
 }
 	
+	public Vehicle changeOwner(Long id, Long person_id) {
+		this.validationPerson(person_id);
+		Vehicle v = this.getById(id);
+		v.setPersonId(person_id);
+		return this.repository.save(v);
+	}
+	
 	private void validationPerson(Long id) {
 		if(id == null) {
 			
