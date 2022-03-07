@@ -24,4 +24,10 @@ spring:
       - id: traffic-ticket-service
         uri: lb://traffic-ticket-service
         predicates:
-        - Path=/ticket/**
+        - Path=/traffic-ticket/**
+      - id: openapi
+        uri: lb://api-gateway
+        predicates:
+        - Path=/v3/api-docs/**
+        filters:
+        - RewritePath=/v3/api-docs/(?<path>.*), /$\{path}/v3/api-docs

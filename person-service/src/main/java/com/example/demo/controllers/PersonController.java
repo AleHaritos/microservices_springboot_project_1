@@ -19,14 +19,18 @@ import com.example.demo.services.ServicePerson;
 
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping(value = "/person")
+@Tag(name = "Person controller", description = "Apis of person service")
 public class PersonController {
 
 	@Autowired
 	private ServicePerson service;
 	
+	@Operation(description = "Insert person in database", summary = "insertPerson")
 	@Retry(name = "default")
 	@RateLimiter(name = "default")
 	@PostMapping
@@ -35,6 +39,7 @@ public class PersonController {
 		return service.addPerson(p);
 	}
 	
+	@Operation(description = "Get all people", summary = "getAllPerson")
 	@Retry(name = "default")
 	@RateLimiter(name = "default")
 	@GetMapping
@@ -43,6 +48,7 @@ public class PersonController {
 		return ResponseEntity.ok(list);
 	}
 	
+	@Operation(description = "Get person by Id", summary = "getById")
 	@RateLimiter(name = "default")
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<Person> getById(@PathVariable Long id) {
@@ -50,6 +56,7 @@ public class PersonController {
 		return ResponseEntity.ok(p);
 	}
 	
+	@Operation(description = "Delete person by Id", summary = "deleteById")
 	@DeleteMapping(value = "/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteById(@PathVariable Long id) {

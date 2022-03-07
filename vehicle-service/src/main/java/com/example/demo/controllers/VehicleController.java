@@ -19,14 +19,18 @@ import com.example.demo.services.VehicleService;
 
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping(value = "/vehicle")
+@Tag(name = "Vehicle Controller", description = "Controller of Vehicle service")
 public class VehicleController {
 
 	@Autowired
 	private VehicleService service;
 	
+	@Operation(description = "Insert Vehicles in database", summary = "insertVehicle")
 	@RateLimiter(name = "default")
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
@@ -34,6 +38,7 @@ public class VehicleController {
 		return service.addVehicle(v);
 	}
 	
+	@Operation(summary = "getAllVehicle", description = "get all vehicles in database")
 	@Retry(name = "default")
 	@RateLimiter(name = "default")
 	@GetMapping
@@ -42,6 +47,7 @@ public class VehicleController {
 		return ResponseEntity.ok(list);
 	}
 	
+	@Operation(summary = "getById", description = "Get vehicle by id")
 	@RateLimiter(name = "default")
 	@GetMapping(value = "/{id}")
 	@ResponseStatus(HttpStatus.OK)
@@ -49,6 +55,7 @@ public class VehicleController {
 		return service.getById(id);
 	}
 	
+	@Operation(summary = "findAllByPersonId", description = "Get vehicle by Person id")
 	@Retry(name = "default")
 	@RateLimiter(name = "default")
 	@GetMapping(value = "/person/{id}")
@@ -57,6 +64,7 @@ public class VehicleController {
 		return this.service.findAllByPerson_id(id);
 	}
 	
+	@Operation(summary = "changeOwner", description = "Change person id -> change vehicles'owner")
 	@Retry(name = "default")
 	@RateLimiter(name = "default")
 	@PutMapping(value = "/{id}/{person-id}")

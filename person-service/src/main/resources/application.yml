@@ -37,3 +37,6 @@ resilience4j:
       default:
         limit-for-period: 150
         limit-refresh-period: 12s
+springdoc:
+  api-docs:
+    path: person/v3/api-docs

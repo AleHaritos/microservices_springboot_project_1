@@ -33,3 +33,6 @@ resilience4j:
       default:
         limit-for-period: 150
         limit-refresh-period: 12s
+springdoc:
+  api-docs:
+    path: traffic-ticket/v3/api-docs
