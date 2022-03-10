@@ -1,0 +1,21 @@
+version: '3.4'
+
+services:
+  zipkin-server:
+    restart: always
+    image: openzipkin/zipkin:2.23.16
+    ports:
+      - 9411:9411
+    networks:
+      - ale-network
+   
+  register-server:
+    image: aleharitos/register-server:0.0.1-SNAPSHOT
+    ports: 
+      - 8761:8761
+    networks:
+      - ale-network   
+      
+networks:
+  ale-network:
+    driver: bridge
