@@ -1,5 +1,0 @@
-server:
-  port: 8741
-spring:
-  application:
-    name: register-server

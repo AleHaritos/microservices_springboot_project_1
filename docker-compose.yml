@@ -15,7 +15,99 @@ services:
       - 8761:8761
     networks:
       - ale-network   
+     
+  api-gateway:
+    image: aleharitos/api-gateway:0.0.1-SNAPSHOT
+    ports: 
+      - 8765:8765
+    depends_on:
+      - register-server
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://register-server:8761/eureka
+      SPRING.ZIPKIN.BASEURL: http://zipkin-server:9411/
+    networks:
+      - ale-network
+   
+  person-db:
+    image: mysql:5.7.22
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    ports: 
+      - 3308:3308
+    environment:
+      TZ: America/Sao_Paulo
+      MYSQL_ROOT_PASSWORD: ale123
+      MYSQL_USER: docker
+      MYSQL_PASSWORD: ale123
+      MYSQL_DATABASE: person_service
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_TCP_PORT: 3308
+    expose:
+      - 3308
+    networks:
+      - ale-network
       
+  vehicle-db:
+    image: mysql:5.7.22
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    ports: 
+      - 3310:3310
+    expose:
+      - 3310
+    environment:
+      TZ: America/Sao_Paulo
+      MYSQL_ROOT_PASSWORD: ale123
+      MYSQL_USER: docker
+      MYSQL_PASSWORD: ale123
+      MYSQL_DATABASE: vehicle_service
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_TCP_PORT: 3310
+    networks:
+      - ale-network
+      
+  traffic-ticket-db:
+    image: mysql:5.7.22
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    ports: 
+      - 3312:3312
+    expose: 
+      - 3312
+    environment:
+      TZ: America/Sao_Paulo
+      MYSQL_PASSWORD: ale123
+      MYSQL_USER: docker
+      MYSQL_ROOT_PASSWORD: ale123
+      MYSQL_DATABASE: traffic_ticket_service
+      MYSQL_HOST: '%'
+      MYSQL_TCP_PORT: 3312
+    networks: 
+      - ale-network
+  
+  person-service:
+    image: aleharitos/person-service
+    restart: always
+    build: 
+      context: .
+      dockerfile: person-service/Dockerfile
+    ports: 
+      - 8000:8000
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://register-server:8761/eureka
+      SPRING.ZIPKIN.BASEURL: http://zipkin-server:9411/
+      SPRING.DATASOURCE.URL: jdbc:mysql://person-db:3308/person_service?useSSL=false&useTimezone=true&serverTimezone=UTC&enabledTLSProtocols=TLSv1.2
+      SPRING.DATASOURCE.USERNAME: root
+      SPRING.DATASOURCE.PASSWORD: ale123
+      SPRING.FLYWAY.URL: jdbc:mysql://person-db:3308/person_service?useSSL=false&useTimezone=true&serverTimezone=UTC&enabledTLSProtocols=TLSv1.2
+      SPRING.FLYWAY.USER: root
+      SPRING.FLYWAY.PASSWORD: ale123
+    depends_on:
+      - register-server
+      - person-db
+    networks: 
+      - ale-network
+ 
 networks:
   ale-network:
     driver: bridge
