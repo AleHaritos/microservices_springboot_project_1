@@ -4,8 +4,20 @@ services:
   zipkin-server:
     restart: always
     image: openzipkin/zipkin:2.23.16
+    depends_on:
+      - rabbit-mq
+    environment:
+      RABBIT_URI: amqp://guest:guest@rabbit-mq:5672
     ports:
       - 9411:9411
+    networks:
+      - ale-network
+   
+  rabbit-mq:
+    image: rabbitmq:3.8.14-management
+    ports: 
+      - 5672:5672
+      - 15672:15672
     networks:
       - ale-network
    
@@ -22,9 +34,13 @@ services:
       - 8765:8765
     depends_on:
       - register-server
+      - rabbit-mq
     environment:
       EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://register-server:8761/eureka
       SPRING.ZIPKIN.BASEURL: http://zipkin-server:9411/
+      RABBIT_URI: amqp://guest:guest@rabbit-mq:5672
+      SPRING_RABBITMQ_HOST: rabbit-mq
+      SPRING_ZIPKIN_SENDER_TYPE: rabbit
     networks:
       - ale-network
    
@@ -96,6 +112,9 @@ services:
     environment:
       EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://register-server:8761/eureka
       SPRING.ZIPKIN.BASEURL: http://zipkin-server:9411/
+      RABBIT_URI: amqp://guest:guest@rabbit-mq:5672
+      SPRING_RABBITMQ_HOST: rabbit-mq
+      SPRING_ZIPKIN_SENDER_TYPE: rabbit
       SPRING.DATASOURCE.URL: jdbc:mysql://person-db:3308/person_service?useSSL=false&useTimezone=true&serverTimezone=UTC&enabledTLSProtocols=TLSv1.2
       SPRING.DATASOURCE.USERNAME: root
       SPRING.DATASOURCE.PASSWORD: ale123
@@ -105,8 +124,65 @@ services:
     depends_on:
       - register-server
       - person-db
+      - rabbit-mq
     networks: 
       - ale-network
+      
+  vehicle-service:
+    image: aleharitos/vehicle-service
+    restart: always
+    build: 
+      context: .
+      dockerfile: vehicle-service/Dockerfile
+    ports:
+      - 8100:8100
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://register-server:8761/eureka
+      SPRING.ZIPKIN.BASEURL: http://zipkin-server:9411/
+      RABBIT_URI: amqp://guest:guest@rabbit-mq:5672
+      SPRING_RABBITMQ_HOST: rabbit-mq
+      SPRING_ZIPKIN_SENDER_TYPE: rabbit
+      SPRING.DATASOURCE.PASSWORD: ale123
+      SPRING.DATASOURCE.USERNAME: root
+      SPRING.DATASOURCE.URL: jdbc:mysql://vehicle-db:3310/vehicle_service?useSSL=false&useTimezone=true&serverTimezone=UTC&enabledTLSProtocols=TLSv1.2
+      SPRING.FLYWAY.URL: jdbc:mysql://vehicle-db:3310/vehicle_service?useSSL=false&useTimezone=true&serverTimezone=UTC&enabledTLSProtocols=TLSv1.2
+      SPRING.FLYWAY.USER: root
+      SPRING.FLYWAY.PASSWORD: ale123
+    depends_on:
+      - register-server
+      - vehicle-db
+      - rabbit-mq
+    networks:
+      - ale-network
+      
+      
+  traffic-ticket-service:
+    image: aleharitos/traffic-ticket-service
+    restart: always
+    build: 
+      context: .
+      dockerfile: traffic-ticket-service/Dockerfile
+    ports:
+      - 8200:8200
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://register-server:8761/eureka
+      SPRING.ZIPKIN.BASEURL: http://zipkin-server:9411/
+      RABBIT_URI: amqp://guest:guest@rabbit-mq:5672
+      SPRING_RABBITMQ_HOST: rabbit-mq
+      SPRING_ZIPKIN_SENDER_TYPE: rabbit
+      SPRING.DATASOURCE.PASSWORD: ale123
+      SPRING.DATASOURCE.USERNAME: root
+      SPRING.DATASOURCE.URL: jdbc:mysql://traffic-ticket-db:3312/traffic_ticket_service?useSSL=false&useTimezone=true&serverTimezone=UTC&enabledTLSProtocols=TLSv1.2
+      SPRING.FLYWAY.URL: jdbc:mysql://traffic-ticket-db:3312/traffic_ticket_service?useSSL=false&useTimezone=true&serverTimezone=UTC&enabledTLSProtocols=TLSv1.2
+      SPRING.FLYWAY.USER: root
+      SPRING.FLYWAY.PASSWORD: ale123
+    depends_on:
+      - register-server
+      - traffic-ticket-db
+      - rabbit-mq
+    networks:
+      - ale-network
+      
  
 networks:
   ale-network:
